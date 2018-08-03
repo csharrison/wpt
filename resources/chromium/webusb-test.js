@@ -510,6 +510,22 @@ class USBTest {
     await otherWindow.navigator.usb.getDevices();
   }
 
+  attachDeviceManagerToContext(handle) {
+    if (!internal.initialized)
+      throw new Error('Call initialize() before ' +
+          'attachDeviceManagerToContext().');
+
+    internal.deviceManager.addBinding(handle);
+  }
+
+  attachChooserServiceToContext(handle) {
+    if (!internal.initialized)
+      throw new Error('Call initialize() before ' +
+          'attachChooserServiceToContext().');
+
+    internal.chooserService.addBinding(handle);
+  }
+
   addFakeDevice(deviceInit) {
     if (!internal.initialized)
       throw new Error('Call initialize() before addFakeDevice().');
