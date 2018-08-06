@@ -2,6 +2,13 @@
 
 let nextBackgroundFetchId = 0;
 
+const defaultSWParams = {
+  // The name of the Service Worker to register.
+  name: 'sw.js',
+  // The message to pass to the Service Worker.
+  message: null,
+};
+
 // Waits for a single message received from a registered Service Worker.
 async function getMessageFromServiceWorker() {
   return new Promise(resolve => {
@@ -14,13 +21,13 @@ async function getMessageFromServiceWorker() {
   });
 }
 
-// Registers the instrumentation Service Worker located at "resources/sw.js"
+// Registers the |name| instrumentation Service Worker located at "resources/"
 // with a scope unique to the test page that's running, and waits for it to be
 // activated. The Service Worker will be unregistered automatically.
 //
 // Depends on /service-workers/service-worker/resources/test-helpers.sub.js
-async function registerAndActivateServiceWorker(test) {
-  const script = 'resources/sw.js';
+async function registerAndActivateServiceWorker(test, name) {
+  const script = `resources/${name}`;
   const scope = 'resources/scope' + location.pathname;
 
   let serviceWorkerRegistration =
@@ -35,10 +42,12 @@ async function registerAndActivateServiceWorker(test) {
 // Creates a Promise test for |func| given the |description|. The |func| will be
 // executed with the `backgroundFetch` object of an activated Service Worker
 // Registration.
-function backgroundFetchTest(func, description) {
+// |swParams| contains customizable Service Worker idata, suce as the name of the
+// Service Worker to register, and the message to post to it.
+function backgroundFetchTest(func, description, swParams = defaultSWParams) {
   promise_test(async t => {
-    const serviceWorkerRegistration = await registerAndActivateServiceWorker(t);
-    serviceWorkerRegistration.active.postMessage(null /* unused */);
+    const serviceWorkerRegistration = await registerAndActivateServiceWorker(t, swParams.name);
+    serviceWorkerRegistration.active.postMessage(swParams.message);
 
     assert_equals(await getMessageFromServiceWorker(), 'ready');
 
